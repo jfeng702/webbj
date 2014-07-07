@@ -147,7 +147,7 @@ get '/game/dealer' do
   dealer_total = calculate_total(session[:dealer_cards])
 
   if dealer_total == BLACKJACK_AMOUNT
-    lost!("Dealer hit Blackjack.")
+    loser!("Dealer hit Blackjack.")
   elsif dealer_total > BLACKJACK_AMOUNT
     winner!("Dealer busts at #{dealer_total}.")
   elsif dealer_total >= DEALER_MIN_HIT #17, 18, 19, 20
