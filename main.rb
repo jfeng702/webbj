@@ -59,19 +59,21 @@ helpers do
   def loser!(msg)
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
-    @error = "<strong>#{session[:player_name]} lost!</strong> #{msg}"
+    session[:chips] = session[:chips] - session[:bet_amount]
+    @error = "<strong>#{session[:player_name]} lost!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
   end
 
   def winner!(msg)
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
-    @success = "<strong>#{session[:player_name]} won!</strong> #{msg}"
+    session[:chips] = session[:chips] + session[:bet_amount]
+    @success = "<strong>#{session[:player_name]} won!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
   end
 
   def tie!(msg)
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
-    @success = "<strong>Tie game.</strong> #{msg}"
+    @success = "<strong>Tie game.</strong> #{msg} #{session[:player_name]} still has #{session[:chips]}."
   end
 
 end
@@ -102,7 +104,8 @@ post '/new_player' do
   end
 
   session[:player_name] = params[:player_name]
-  redirect '/game'
+  session[:chips] = 500
+  redirect '/game/player/bet'
 end
 
 get '/game' do
@@ -121,6 +124,27 @@ get '/game' do
 
 
   erb :game
+end
+
+get '/game/player/bet' do
+  erb :bet
+end
+
+post '/game/player/bet' do
+
+  if session[:chips] == 0
+    @error = "You have no more money."
+    halt erb(:bet)
+  elsif  params[:bet_amount].empty?
+    @error = "Bet is required."
+    halt erb(:bet)
+  elsif params[:bet_amount].to_i > session[:chips]
+    @error = "Can't bet more than you have"
+    halt erb(:bet)
+  end
+
+  session[:bet_amount] = params[:bet_amount].to_i
+  redirect :game
 end
 
 post '/game/player/hit' do
@@ -173,7 +197,7 @@ get '/game/compare' do
   if dealer_total > player_total
     loser!("#{session[:player_name]} stayed at #{player_total}. Dealer stayed at #{dealer_total}.")
   elsif dealer_total == player_total
-    tie!("#{session[:player_name]} tied with Dealer at #{player_total}")
+    tie!("#{session[:player_name]} tied with Dealer at #{player_total}.")
   else
     winner!("#{session[:player_name]} stayed at #{player_total}. Dealer stayed at #{dealer_total}.")
   end
@@ -182,7 +206,7 @@ get '/game/compare' do
 end
 
 get '/game/replay' do
-  redirect '/game'
+  redirect '/game/player/bet'
 end
 
 get '/game/endgame' do

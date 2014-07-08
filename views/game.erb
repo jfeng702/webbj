@@ -4,7 +4,9 @@
 
 <% if @show_replay_button %>
   <strong>Play again?</strong>
-  <a href="/game" class="btn btn-primary">Yes</a>
+  <form id="bet_again" action="/game/player/bet" method='get'>
+    <input type="submit" class="btn btn-primary" value="Yes"/>
+  </form>
   <a href="/game/endgame" class="btn">No</a>
 <% end %>
 
@@ -33,8 +35,8 @@
 </div>
 
 <p>
-  What would <%= session[:player_name] %> like to do?
-<%= session[:player_name] %> has a total of <%= calculate_total(session[:player_cards]) %>
+<%= session[:player_name] %> has a total of <%= calculate_total(session[:player_cards]) %>.
+  What would <%= session[:player_name] %> like to do? <%= session[:player_name] %> has $<%=session[:chips] %> total. Bet amount this round: $<%= session[:bet_amount] %>.
 
 <% if @show_hit_or_stay_buttons %>
   <form id="hit_form" action="/game/player/hit" method='post'>
