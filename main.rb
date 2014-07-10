@@ -60,20 +60,20 @@ helpers do
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
     session[:chips] = session[:chips] - session[:bet_amount]
-    @error = "<strong>#{session[:player_name]} lost!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
+    @loser = "<strong>#{session[:player_name]} lost!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
   end
 
   def winner!(msg)
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
     session[:chips] = session[:chips] + session[:bet_amount]
-    @success = "<strong>#{session[:player_name]} won!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
+    @winner = "<strong>#{session[:player_name]} won!</strong> #{msg} #{session[:player_name]} now has #{session[:chips]}."
   end
 
   def tie!(msg)
     @show_hit_or_stay_buttons = false
     @show_replay_button = true
-    @success = "<strong>Tie game.</strong> #{msg} #{session[:player_name]} still has #{session[:chips]}."
+    @winner = "<strong>Tie game.</strong> #{msg} #{session[:player_name]} still has #{session[:chips]}."
   end
 
 end
@@ -109,6 +109,7 @@ post '/new_player' do
 end
 
 get '/game' do
+  session[:turn] = session[:player_name]
   # create a deck and put it in session
   suits = ['H', 'D', 'S', 'C']
   values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
@@ -158,7 +159,7 @@ post '/game/player/hit' do
     loser!("#{session[:player_name]} busted at #{player_total}!")
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/player/stay' do
@@ -168,6 +169,7 @@ post '/game/player/stay' do
 end
 
 get '/game/dealer' do
+  session[:turn] = "dealer"
   dealer_total = calculate_total(session[:dealer_cards])
 
   if dealer_total == BLACKJACK_AMOUNT
@@ -182,7 +184,7 @@ get '/game/dealer' do
     @show_dealer_hit_button = true
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
 post '/game/dealer/hit' do
@@ -202,7 +204,7 @@ get '/game/compare' do
     winner!("#{session[:player_name]} stayed at #{player_total}. Dealer stayed at #{dealer_total}.")
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
 get '/game/replay' do
