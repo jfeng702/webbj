@@ -123,7 +123,11 @@ get '/game' do
   session[:dealer_cards] << session[:deck].pop
   session[:player_cards] << session[:deck].pop
 
-
+  player_total = calculate_total(session[:player_cards])
+  if player_total == BLACKJACK_AMOUNT
+    winner!("#{session[:player_name]} hits Blackjack!")
+  end
+  
   erb :game
 end
 
@@ -165,6 +169,9 @@ end
 post '/game/player/stay' do
   @success = "#{session[:player_name]} has chosen to stay."
   @show_hit_or_stay_buttons = false
+
+
+
   redirect '/game/dealer'
 end
 
